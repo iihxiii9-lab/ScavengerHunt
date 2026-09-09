@@ -641,7 +641,49 @@ function drawToCanvas(el){
   const { sx, sy, sw, sh } = squareCrop(el, size);
   ctx.clearRect(0,0,size,size);
   ctx.drawImage(el, sx, sy, sw, sh, 0, 0, size, size);
+  normalizeLighting(canvas);
   return canvas;
+}
+
+/* Gray-world white balance + adaptive brightness lift, so warm indoor light,
+   cool fluorescent light, shade, or a dim room don't shift what color the
+   model (and the hue check) thinks it's looking at. */
+function normalizeLighting(canvas){
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imgData.data;
+  const n = data.length;
+
+  let sumR = 0, sumG = 0, sumB = 0, sumL = 0, count = 0;
+  for(let i = 0; i < n; i += 16){
+    sumR += data[i]; sumG += data[i+1]; sumB += data[i+2];
+    sumL += 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+    count++;
+  }
+  if(count === 0) return;
+  const avgR = sumR/count, avgG = sumG/count, avgB = sumB/count, avgL = sumL/count;
+  const gray = (avgR + avgG + avgB) / 3;
+  const clamp = (v) => Math.max(0.6, Math.min(1.6, v));
+  const kR = clamp(gray / (avgR || 1));
+  const kG = clamp(gray / (avgG || 1));
+  const kB = clamp(gray / (avgB || 1));
+
+  let gamma = 1;
+  if(avgL < 90) gamma = 0.72;       // lift dim / low-light shots
+  else if(avgL > 205) gamma = 1.12; // tame washed-out / overexposed shots
+
+  for(let i = 0; i < n; i += 4){
+    let r = data[i]*kR, g = data[i+1]*kG, b = data[i+2]*kB;
+    if(gamma !== 1){
+      r = 255 * Math.pow(Math.max(r,0)/255, gamma);
+      g = 255 * Math.pow(Math.max(g,0)/255, gamma);
+      b = 255 * Math.pow(Math.max(b,0)/255, gamma);
+    }
+    data[i]   = r < 0 ? 0 : r > 255 ? 255 : r;
+    data[i+1] = g < 0 ? 0 : g > 255 ? 255 : g;
+    data[i+2] = b < 0 ? 0 : b > 255 ? 255 : b;
+  }
+  ctx.putImageData(imgData, 0, 0);
 }
 
 function classifySync(canvas){
