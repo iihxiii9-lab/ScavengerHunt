@@ -145,9 +145,9 @@
   }
   .viewfinder{
     position:relative;
-    border-radius:16px;
+    border-radius:14px;
     overflow:hidden;
-    aspect-ratio:1/1;
+    aspect-ratio:2.35/1;
     background:#0B0812;
     margin-bottom:14px;
     isolation:isolate;
@@ -170,12 +170,12 @@
   .vf-empty span{ font-size:12.5px; font-weight:500; line-height:1.5; }
 
   .vf-frame{
-    position:absolute; inset:14px;
+    position:absolute; inset:10px;
     z-index:3; pointer-events:none;
   }
   .vf-frame i{
     position:absolute;
-    width:22px; height:22px;
+    width:18px; height:18px;
     border:2.5px solid var(--accent);
     transition:border-color 0.25s ease, opacity 0.25s ease;
     opacity:0.9;
@@ -187,16 +187,16 @@
   .vf-frame.matched i{ border-color:var(--green); opacity:1; }
 
   .scan-line{
-    position:absolute; left:14px; right:14px; top:14px;
+    position:absolute; left:12px; right:12px; top:10px;
     height:2px; z-index:3;
-    background:linear-gradient(90deg, transparent, var(--accent), transparent);
-    box-shadow:0 0 8px 1px var(--accent-soft);
-    animation:scan-move 2.1s ease-in-out infinite;
-    opacity:0.85;
+    background:linear-gradient(90deg, transparent, #FF3B3B, #FF3B3B, transparent);
+    box-shadow:0 0 10px 1.5px rgba(255,59,59,0.65), 0 0 2px 1px #FF3B3B;
+    animation:scan-move 1.7s ease-in-out infinite;
+    opacity:0.95;
   }
   @keyframes scan-move{
     0%{ transform:translateY(0); }
-    50%{ transform:translateY(calc(100cqh - 28px)); }
+    50%{ transform:translateY(calc(100cqh - 20px)); }
     100%{ transform:translateY(0); }
   }
   .viewfinder{ container-type:size; }
@@ -421,8 +421,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8a2 2 0 0 1 2-2h1.2a1 1 0 0 0 .9-.55l.6-1.2A1 1 0 0 1 9.6 3.6h4.8a1 1 0 0 1 .9.65l.6 1.2a1 1 0 0 0 .9.55H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z"/><circle cx="12" cy="12.5" r="3.4"/></svg>
       <span>Start scanning</span>
     </button>
-    <button class="scan-btn ghost" id="lockFallbackBtn" style="display:none;">Use a photo instead</button>
-    <input type="file" accept="image/*" capture="environment" id="lockFileInput">
+    <button class="scan-btn ghost" id="lockFallbackBtn" style="display:none;">Retry camera</button>
   </div>
 </div>
 
@@ -443,7 +442,7 @@
     <div class="viewfinder" id="gameViewfinder">
       <div class="vf-empty" id="gameVfEmpty" style="display:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8a2 2 0 0 1 2-2h1.2a1 1 0 0 0 .9-.55l.6-1.2A1 1 0 0 1 9.6 3.6h4.8a1 1 0 0 1 .9.65l.6 1.2a1 1 0 0 0 .9.55H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z"/><circle cx="12" cy="12.5" r="3.4"/></svg>
-        <span>Camera unavailable &mdash; use a photo instead</span>
+        <span>Camera unavailable &mdash; tap retry camera below</span>
       </div>
       <div class="vf-tint" id="gameTint"></div>
       <div class="vf-frame" id="gameFrame"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>
@@ -455,8 +454,7 @@
       <div class="status-text" id="gameStatus">Scanning&hellip;</div>
     </div>
 
-    <button class="scan-btn ghost" id="gameFallbackBtn" style="display:none;">Take a photo instead</button>
-    <input type="file" accept="image/*" capture="environment" id="gameFileInput">
+    <button class="scan-btn ghost" id="gameFallbackBtn" style="display:none;">Retry camera</button>
     <p class="hint" id="hintText">Hold the color steady in the frame &mdash; it locks in automatically.</p>
   </div>
 </div>
@@ -499,11 +497,11 @@ let attemptsThisRound = 0;
 let gameStart = 0;
 let roundStart = 0;
 
-const VERIFY_THRESHOLD = 0.30;
-const MATCH_THRESHOLD = 0.32;
+const VERIFY_THRESHOLD = 0.26;
+const MATCH_THRESHOLD = 0.28;
 const HISTORY_N = 5;
-const NEED_MAJORITY = 3;
-const TICK_MS = 260;
+const NEED_MAJORITY = 2;
+const TICK_MS = 220;
 
 let mediaStream = null;
 let videoEl = null;
@@ -647,7 +645,10 @@ function drawToCanvas(el){
 
 /* Gray-world white balance + adaptive brightness lift, so warm indoor light,
    cool fluorescent light, shade, or a dim room don't shift what color the
-   model (and the hue check) thinks it's looking at. */
+   model (and the hue check) thinks it's looking at. Correction strength is
+   scaled down when the frame already shows one strong, saturated color
+   (i.e. a colored object filling the frame) so it never washes a real red
+   or blue out toward gray \u2014 it only steps in for genuine lighting casts. */
 function normalizeLighting(canvas){
   const ctx = canvas.getContext('2d');
   const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -663,14 +664,18 @@ function normalizeLighting(canvas){
   if(count === 0) return;
   const avgR = sumR/count, avgG = sumG/count, avgB = sumB/count, avgL = sumL/count;
   const gray = (avgR + avgG + avgB) / 3;
+
+  const spread = Math.max(avgR,avgG,avgB) - Math.min(avgR,avgG,avgB);
+  const wbStrength = spread > 60 ? 0.12 : spread > 30 ? 0.4 : 0.85;
+
   const clamp = (v) => Math.max(0.6, Math.min(1.6, v));
-  const kR = clamp(gray / (avgR || 1));
-  const kG = clamp(gray / (avgG || 1));
-  const kB = clamp(gray / (avgB || 1));
+  const kR = 1 + (clamp(gray / (avgR || 1)) - 1) * wbStrength;
+  const kG = 1 + (clamp(gray / (avgG || 1)) - 1) * wbStrength;
+  const kB = 1 + (clamp(gray / (avgB || 1)) - 1) * wbStrength;
 
   let gamma = 1;
-  if(avgL < 90) gamma = 0.72;       // lift dim / low-light shots
-  else if(avgL > 205) gamma = 1.12; // tame washed-out / overexposed shots
+  if(avgL < 80) gamma = 0.78;       // lift dim / low-light shots
+  else if(avgL > 210) gamma = 1.08; // tame washed-out / overexposed shots
 
   for(let i = 0; i < n; i += 4){
     let r = data[i]*kR, g = data[i+1]*kG, b = data[i+2]*kB;
@@ -906,84 +911,58 @@ function newGame(){
   renderRound();
 }
 
-/* ---------- no-camera fallback (single photo) ---------- */
-async function classifyFile(file, scope, onDone){
-  const url = URL.createObjectURL(file);
-  const img = new Image();
-  img.onload = async () => {
-    const canvas = drawToCanvas(img);
-    const out = classifySync(canvas);
-    const data = await out.data();
-    out.dispose();
-    onDone(combinedPick(data, canvas));
-    URL.revokeObjectURL(url);
-  };
-  img.src = url;
-}
-
-document.getElementById('lockFallbackBtn').addEventListener('click', ()=>{
-  document.getElementById('lockFileInput').click();
-});
-document.getElementById('lockFileInput').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  e.target.value = '';
-  if(!file) return;
-  document.getElementById('lockStatus').textContent = 'Checking\u2026';
-  classifyFile(file, 'lock', (pick)=>{
-    if(pick.confidence >= VERIFY_THRESHOLD){
-      document.getElementById('lockStatus').textContent = 'Verified \u2014 ' + Math.round(pick.confidence*100) + '%';
-      flashMatched('lock', COLORS[pick.key] ? COLORS[pick.key].hex : '#3ECF8E');
-      setTimeout(()=>{
-        document.getElementById('lockScreen').classList.remove('show');
-        document.getElementById('appScreen').style.display = 'flex';
-        appState = 'playing';
-        newGame();
-      }, 900);
-    } else {
-      document.getElementById('lockStatus').textContent = 'No match (' + Math.round(pick.confidence*100) + '%) \u2014 try again';
-    }
-  });
+/* ---------- camera retry (no photo fallback \u2014 scanner only) ---------- */
+document.getElementById('lockFallbackBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('lockFallbackBtn');
+  btn.disabled = true;
+  const ok = await beginScanning('locked');
+  btn.disabled = false;
+  if(ok){
+    btn.style.display = 'none';
+    document.getElementById('gameFallbackBtn').style.display = 'none';
+  }
 });
 
-document.getElementById('gameFallbackBtn').addEventListener('click', ()=>{
-  document.getElementById('gameFileInput').click();
-});
-document.getElementById('gameFileInput').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  e.target.value = '';
-  if(!file) return;
-  document.getElementById('gameStatus').textContent = 'Checking\u2026';
-  classifyFile(file, 'game', (pick)=>{
-    const targetKey = order[roundIndex];
-    if(pick.key === targetKey && pick.confidence >= MATCH_THRESHOLD){
-      triggerRoundSuccess(pick.confidence);
-    } else {
-      attemptsThisRound++;
-      document.getElementById('gameStatus').textContent =
-        'That looked like ' + (COLORS[pick.key]?COLORS[pick.key].word:pick.key) + ' (' + Math.round(pick.confidence*100) + '%). Try again!';
-    }
-  });
+document.getElementById('gameFallbackBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('gameFallbackBtn');
+  btn.disabled = true;
+  const ok = await beginScanning('playing');
+  btn.disabled = false;
+  if(ok){
+    document.getElementById('lockFallbackBtn').style.display = 'none';
+    btn.style.display = 'none';
+  }
 });
 
 /* ---------- start / auto-start camera ---------- */
-async function beginScanning(){
-  document.getElementById('lockStatus').textContent = 'Requesting camera\u2026';
+async function beginScanning(nextState){
+  nextState = nextState || 'locked';
+  const statusId = nextState === 'playing' ? 'gameStatus' : 'lockStatus';
+  document.getElementById(statusId).textContent = 'Requesting camera\u2026';
   const ok = await ensureCamera();
   if(ok){
-    mountVideo('lockViewfinder', 'lockVfEmpty');
-    document.getElementById('lockScanLine').style.display = 'block';
-    document.getElementById('lockDot').style.display = 'block';
-    document.getElementById('lockStatus').textContent = 'Scanning\u2026';
+    if(nextState === 'locked'){
+      mountVideo('lockViewfinder', 'lockVfEmpty');
+      document.getElementById('lockScanLine').style.display = 'block';
+      document.getElementById('lockDot').style.display = 'block';
+      document.getElementById('lockStatus').textContent = 'Scanning\u2026';
+      document.getElementById('lockStartBtn').style.display = 'none';
+    } else {
+      mountVideo('gameViewfinder', 'gameVfEmpty');
+      document.getElementById('gameDot').style.display = 'block';
+      document.getElementById('gameStatus').textContent = 'Scanning\u2026';
+    }
     document.getElementById('gameScanLine').style.display = 'block';
-    document.getElementById('lockStartBtn').style.display = 'none';
-    appState = 'locked';
+    appState = nextState;
     startScanLoop();
     return true;
   } else {
-    document.getElementById('lockStatus').textContent = 'Tap to allow camera access';
-    document.getElementById('lockStartBtn').style.display = 'flex';
-    document.getElementById('lockStartBtn').disabled = false;
-    document.getElementById('lockFallbackBtn').style.display = 'block';
+    document.getElementById(statusId).textContent = 'Tap to allow camera access';
+    if(nextState === 'locked'){
+      document.getElementById('lockStartBtn').style.display = 'flex';
+      document.getElementById('lockStartBtn').disabled = false;
+    }
+    document.getElementById(nextState === 'locked' ? 'lockFallbackBtn' : 'gameFallbackBtn').style.display = 'block';
     return false;
   }
 }
@@ -991,7 +970,7 @@ async function beginScanning(){
 document.getElementById('lockStartBtn').addEventListener('click', async ()=>{
   const btn = document.getElementById('lockStartBtn');
   btn.disabled = true;
-  const ok = await beginScanning();
+  const ok = await beginScanning('locked');
   if(!ok){
     document.getElementById('gameFallbackBtn').style.display = 'block';
   }
@@ -1006,7 +985,7 @@ document.getElementById('playAgain').addEventListener('click', newGame);
     document.getElementById('lockScreen').classList.add('show');
     document.getElementById('lockStartBtn').style.display = 'none';
     document.getElementById('lockStatus').textContent = 'Opening camera\u2026';
-    await beginScanning(); // try straight away; falls back to a tap if the browser blocks it
+    await beginScanning('locked'); // try straight away; falls back to a tap if the browser blocks it
   }catch(err){
     document.getElementById('loadingText').textContent = 'Something went wrong loading the model.';
     console.error(err);
