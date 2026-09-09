@@ -488,6 +488,9 @@ const COLORS = {
   yellow: { hex:'#FFCB4D', word:'yellow' },
 };
 
+const KEY_TO_IDX = {};
+LABELS.forEach((label, i) => { KEY_TO_IDX[KEY_MAP[label] || label] = i; });
+
 let model = null;
 let order = [];
 let roundIndex = 0;
@@ -657,6 +660,71 @@ function topPick(dataArr){
   return { key: KEY_MAP[label] || label, confidence: dataArr[bestIdx] };
 }
 
+/* ---------- classical hue analysis (backs up the model on blue/green) ---------- */
+function analyzeHue(canvas){
+  const ctx = canvas.getContext('2d');
+  const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  let sumSin = 0, sumCos = 0, sumWeight = 0;
+  const step = 16; // sample every 4th pixel (RGBA stride 4 * 4)
+  for(let i = 0; i < data.length; i += step){
+    const r = data[i] / 255, g = data[i+1] / 255, b = data[i+2] / 255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+    if(d < 0.02) continue; // near-gray pixel, contributes no hue signal
+    let h;
+    if(max === r) h = ((g - b) / d) % 6;
+    else if(max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+    if(h < 0) h += 360;
+    const s = d / max;
+    const v = max;
+    const w = s * v; // vivid, bright pixels count more than dull ones
+    sumSin += Math.sin(h * Math.PI/180) * w;
+    sumCos += Math.cos(h * Math.PI/180) * w;
+    sumWeight += w;
+  }
+  if(sumWeight < 0.5) return { key:null, strength:0, hue:null };
+  let hue = Math.atan2(sumSin, sumCos) * 180/Math.PI;
+  if(hue < 0) hue += 360;
+  const strength = Math.min(1, sumWeight / (data.length/step) * 3);
+
+  let key = null;
+  if(hue >= 340 || hue < 18) key = 'red';
+  else if(hue >= 42 && hue < 68) key = 'yellow';
+  else if(hue >= 78 && hue < 168) key = 'green';
+  else if(hue >= 178 && hue < 258) key = 'blue';
+  return { key, strength, hue };
+}
+
+/* Blend the neural net's prediction with the hue reading. The model was
+   trained on a limited photo set and can mix up blue/green under some
+   lighting; plain hue is very reliable at telling those two apart, so it
+   acts as the tie-breaker whenever the two disagree on blue vs green. */
+function combinedPick(dataArr, canvas){
+  const tm = topPick(dataArr);
+  const hue = analyzeHue(canvas);
+
+  if(!hue.key) return tm; // no clear color in frame, trust the model
+
+  if(hue.key === tm.key){
+    return { key: tm.key, confidence: Math.min(0.99, tm.confidence + 0.1) };
+  }
+
+  const isBG = (k) => k === 'blue' || k === 'green';
+  if(isBG(tm.key) && isBG(hue.key)){
+    const idx = KEY_TO_IDX[hue.key];
+    const modelConf = idx !== undefined ? dataArr[idx] : 0;
+    return { key: hue.key, confidence: Math.max(modelConf, hue.strength * 0.7, 0.4) };
+  }
+
+  // Other disagreements: let a strong, saturated hue reading override a
+  // shaky model guess, otherwise stick with the model.
+  if(hue.strength > 0.4 && tm.confidence < 0.45){
+    return { key: hue.key, confidence: hue.strength };
+  }
+  return tm;
+}
+
 function mostFrequent(arr){
   const counts = {};
   let best = null, bestCount = 0;
@@ -694,7 +762,7 @@ function scanTick(){
   const out = classifySync(canvas);
   out.data().then(data => {
     out.dispose();
-    const pick = topPick(data);
+    const pick = combinedPick(data, canvas);
     historyKeys.push(pick.key);
     historyConf.push(pick.confidence);
     if(historyKeys.length > HISTORY_N){ historyKeys.shift(); historyConf.shift(); }
@@ -805,7 +873,7 @@ async function classifyFile(file, scope, onDone){
     const out = classifySync(canvas);
     const data = await out.data();
     out.dispose();
-    onDone(topPick(data));
+    onDone(combinedPick(data, canvas));
     URL.revokeObjectURL(url);
   };
   img.src = url;
@@ -855,10 +923,8 @@ document.getElementById('gameFileInput').addEventListener('change', (e)=>{
   });
 });
 
-/* ---------- start button ---------- */
-document.getElementById('lockStartBtn').addEventListener('click', async ()=>{
-  const btn = document.getElementById('lockStartBtn');
-  btn.disabled = true;
+/* ---------- start / auto-start camera ---------- */
+async function beginScanning(){
   document.getElementById('lockStatus').textContent = 'Requesting camera\u2026';
   const ok = await ensureCamera();
   if(ok){
@@ -867,13 +933,24 @@ document.getElementById('lockStartBtn').addEventListener('click', async ()=>{
     document.getElementById('lockDot').style.display = 'block';
     document.getElementById('lockStatus').textContent = 'Scanning\u2026';
     document.getElementById('gameScanLine').style.display = 'block';
-    btn.style.display = 'none';
+    document.getElementById('lockStartBtn').style.display = 'none';
     appState = 'locked';
     startScanLoop();
+    return true;
   } else {
-    document.getElementById('lockStatus').textContent = 'Camera unavailable';
-    btn.style.display = 'none';
+    document.getElementById('lockStatus').textContent = 'Tap to allow camera access';
+    document.getElementById('lockStartBtn').style.display = 'flex';
+    document.getElementById('lockStartBtn').disabled = false;
     document.getElementById('lockFallbackBtn').style.display = 'block';
+    return false;
+  }
+}
+
+document.getElementById('lockStartBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('lockStartBtn');
+  btn.disabled = true;
+  const ok = await beginScanning();
+  if(!ok){
     document.getElementById('gameFallbackBtn').style.display = 'block';
   }
 });
@@ -885,6 +962,9 @@ document.getElementById('playAgain').addEventListener('click', newGame);
     model = await loadModel();
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('lockScreen').classList.add('show');
+    document.getElementById('lockStartBtn').style.display = 'none';
+    document.getElementById('lockStatus').textContent = 'Opening camera\u2026';
+    await beginScanning(); // try straight away; falls back to a tap if the browser blocks it
   }catch(err){
     document.getElementById('loadingText').textContent = 'Something went wrong loading the model.';
     console.error(err);
