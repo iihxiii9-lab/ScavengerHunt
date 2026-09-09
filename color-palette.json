@@ -1,0 +1,514 @@
+{
+  "red": [
+    {
+      "name": "Fire Brick",
+      "hex": "#B22222",
+      "hue": 0.0,
+      "saturation": 0.809,
+      "value": 0.698
+    },
+    {
+      "name": "Dark Red",
+      "hex": "#8B0000",
+      "hue": 0.0,
+      "saturation": 1.0,
+      "value": 0.545
+    },
+    {
+      "name": "Red",
+      "hex": "#FF0000",
+      "hue": 0.0,
+      "saturation": 1.0,
+      "value": 1.0
+    },
+    {
+      "name": "Maroon",
+      "hex": "#800000",
+      "hue": 0.0,
+      "saturation": 1.0,
+      "value": 0.502
+    },
+    {
+      "name": "Indian Red",
+      "hex": "#CD5C5C",
+      "hue": 0.0,
+      "saturation": 0.551,
+      "value": 0.804
+    },
+    {
+      "name": "Coral Red",
+      "hex": "#FF4040",
+      "hue": 0.0,
+      "saturation": 0.749,
+      "value": 1.0
+    },
+    {
+      "name": "Vermilion",
+      "hex": "#E34234",
+      "hue": 4.8,
+      "saturation": 0.771,
+      "value": 0.89
+    },
+    {
+      "name": "Chili Red",
+      "hex": "#E23D28",
+      "hue": 6.8,
+      "saturation": 0.823,
+      "value": 0.886
+    },
+    {
+      "name": "Brick Red",
+      "hex": "#B85042",
+      "hue": 7.1,
+      "saturation": 0.641,
+      "value": 0.722
+    },
+    {
+      "name": "Scarlet",
+      "hex": "#FF2400",
+      "hue": 8.5,
+      "saturation": 1.0,
+      "value": 1.0
+    },
+    {
+      "name": "Tomato",
+      "hex": "#FF6347",
+      "hue": 9.1,
+      "saturation": 0.722,
+      "value": 1.0
+    },
+    {
+      "name": "Salmon Red",
+      "hex": "#E9967A",
+      "hue": 15.1,
+      "saturation": 0.476,
+      "value": 0.914
+    },
+    {
+      "name": "Ruby",
+      "hex": "#E0115F",
+      "hue": 337.4,
+      "saturation": 0.924,
+      "value": 0.878
+    },
+    {
+      "name": "Rose Red",
+      "hex": "#C21E56",
+      "hue": 339.5,
+      "saturation": 0.845,
+      "value": 0.761
+    },
+    {
+      "name": "Crimson",
+      "hex": "#DC143C",
+      "hue": 348.0,
+      "saturation": 0.909,
+      "value": 0.863
+    },
+    {
+      "name": "Cherry Red",
+      "hex": "#D2042D",
+      "hue": 348.1,
+      "saturation": 0.981,
+      "value": 0.824
+    },
+    {
+      "name": "Cardinal",
+      "hex": "#C41E3A",
+      "hue": 349.9,
+      "saturation": 0.847,
+      "value": 0.769
+    },
+    {
+      "name": "Wine",
+      "hex": "#722F37",
+      "hue": 352.8,
+      "saturation": 0.588,
+      "value": 0.447
+    }
+  ],
+  "blue": [
+    {
+      "name": "Ice Blue",
+      "hex": "#A5F2F3",
+      "hue": 180.8,
+      "saturation": 0.321,
+      "value": 0.953
+    },
+    {
+      "name": "Turquoise Blue",
+      "hex": "#00CED1",
+      "hue": 180.9,
+      "saturation": 1.0,
+      "value": 0.82
+    },
+    {
+      "name": "Powder Blue",
+      "hex": "#B0E0E6",
+      "hue": 186.7,
+      "saturation": 0.235,
+      "value": 0.902
+    },
+    {
+      "name": "Teal Blue",
+      "hex": "#367588",
+      "hue": 193.9,
+      "saturation": 0.603,
+      "value": 0.533
+    },
+    {
+      "name": "Cerulean",
+      "hex": "#007BA7",
+      "hue": 195.8,
+      "saturation": 1.0,
+      "value": 0.655
+    },
+    {
+      "name": "Sky Blue",
+      "hex": "#87CEEB",
+      "hue": 197.4,
+      "saturation": 0.426,
+      "value": 0.922
+    },
+    {
+      "name": "Baby Blue",
+      "hex": "#89CFF0",
+      "hue": 199.2,
+      "saturation": 0.429,
+      "value": 0.941
+    },
+    {
+      "name": "Ocean Blue",
+      "hex": "#0077BE",
+      "hue": 202.4,
+      "saturation": 1.0,
+      "value": 0.745
+    },
+    {
+      "name": "Steel Blue",
+      "hex": "#4682B4",
+      "hue": 207.3,
+      "saturation": 0.611,
+      "value": 0.706
+    },
+    {
+      "name": "Azure",
+      "hex": "#007FFF",
+      "hue": 210.1,
+      "saturation": 1.0,
+      "value": 1.0
+    },
+    {
+      "name": "Denim Blue",
+      "hex": "#1560BD",
+      "hue": 213.2,
+      "saturation": 0.889,
+      "value": 0.741
+    },
+    {
+      "name": "Cobalt Blue",
+      "hex": "#0047AB",
+      "hue": 215.1,
+      "saturation": 1.0,
+      "value": 0.671
+    },
+    {
+      "name": "Sapphire",
+      "hex": "#0F52BA",
+      "hue": 216.5,
+      "saturation": 0.919,
+      "value": 0.729
+    },
+    {
+      "name": "Cornflower Blue",
+      "hex": "#6495ED",
+      "hue": 218.5,
+      "saturation": 0.578,
+      "value": 0.929
+    },
+    {
+      "name": "Royal Blue",
+      "hex": "#4169E1",
+      "hue": 225.0,
+      "saturation": 0.711,
+      "value": 0.882
+    },
+    {
+      "name": "Periwinkle Blue",
+      "hex": "#8F99FB",
+      "hue": 234.4,
+      "saturation": 0.43,
+      "value": 0.984
+    },
+    {
+      "name": "Navy",
+      "hex": "#000080",
+      "hue": 240.0,
+      "saturation": 1.0,
+      "value": 0.502
+    },
+    {
+      "name": "Midnight Blue",
+      "hex": "#191970",
+      "hue": 240.0,
+      "saturation": 0.777,
+      "value": 0.439
+    }
+  ],
+  "green": [
+    {
+      "name": "Moss Green",
+      "hex": "#8A9A5B",
+      "hue": 75.2,
+      "saturation": 0.409,
+      "value": 0.604
+    },
+    {
+      "name": "Avocado Green",
+      "hex": "#568203",
+      "hue": 80.8,
+      "saturation": 0.977,
+      "value": 0.51
+    },
+    {
+      "name": "Olive Green",
+      "hex": "#556B2F",
+      "hue": 82.0,
+      "saturation": 0.561,
+      "value": 0.42
+    },
+    {
+      "name": "Chartreuse",
+      "hex": "#7FFF00",
+      "hue": 90.1,
+      "saturation": 1.0,
+      "value": 1.0
+    },
+    {
+      "name": "Grass Green",
+      "hex": "#7CFC00",
+      "hue": 90.5,
+      "saturation": 1.0,
+      "value": 0.988
+    },
+    {
+      "name": "Pistachio Green",
+      "hex": "#93C572",
+      "hue": 96.1,
+      "saturation": 0.421,
+      "value": 0.773
+    },
+    {
+      "name": "Kelly Green",
+      "hex": "#4CBB17",
+      "hue": 100.6,
+      "saturation": 0.877,
+      "value": 0.733
+    },
+    {
+      "name": "Fern Green",
+      "hex": "#4F7942",
+      "hue": 105.8,
+      "saturation": 0.455,
+      "value": 0.475
+    },
+    {
+      "name": "Basil Green",
+      "hex": "#4C9141",
+      "hue": 111.7,
+      "saturation": 0.552,
+      "value": 0.569
+    },
+    {
+      "name": "Forest Green",
+      "hex": "#228B22",
+      "hue": 120.0,
+      "saturation": 0.755,
+      "value": 0.545
+    },
+    {
+      "name": "Lime Green",
+      "hex": "#32CD32",
+      "hue": 120.0,
+      "saturation": 0.756,
+      "value": 0.804
+    },
+    {
+      "name": "Mint Green",
+      "hex": "#98FF98",
+      "hue": 120.0,
+      "saturation": 0.404,
+      "value": 1.0
+    },
+    {
+      "name": "Hunter Green",
+      "hex": "#355E3B",
+      "hue": 128.8,
+      "saturation": 0.436,
+      "value": 0.369
+    },
+    {
+      "name": "Emerald",
+      "hex": "#50C878",
+      "hue": 140.0,
+      "saturation": 0.6,
+      "value": 0.784
+    },
+    {
+      "name": "Sea Green",
+      "hex": "#2E8B57",
+      "hue": 146.5,
+      "saturation": 0.669,
+      "value": 0.545
+    },
+    {
+      "name": "Shamrock Green",
+      "hex": "#009E60",
+      "hue": 156.5,
+      "saturation": 1.0,
+      "value": 0.62
+    },
+    {
+      "name": "Jade",
+      "hex": "#00A86B",
+      "hue": 158.2,
+      "saturation": 1.0,
+      "value": 0.659
+    },
+    {
+      "name": "Pine Green",
+      "hex": "#01796F",
+      "hue": 175.0,
+      "saturation": 0.992,
+      "value": 0.475
+    }
+  ],
+  "yellow": [
+    {
+      "name": "Sand Yellow",
+      "hex": "#EBC582",
+      "hue": 38.3,
+      "saturation": 0.447,
+      "value": 0.922
+    },
+    {
+      "name": "Marigold Yellow",
+      "hex": "#EAA221",
+      "hue": 38.5,
+      "saturation": 0.859,
+      "value": 0.918
+    },
+    {
+      "name": "Amber",
+      "hex": "#FFBF00",
+      "hue": 44.9,
+      "saturation": 1.0,
+      "value": 1.0
+    },
+    {
+      "name": "Saffron Yellow",
+      "hex": "#F4C430",
+      "hue": 45.3,
+      "saturation": 0.803,
+      "value": 0.957
+    },
+    {
+      "name": "Mustard",
+      "hex": "#FFDB58",
+      "hue": 47.1,
+      "saturation": 0.655,
+      "value": 1.0
+    },
+    {
+      "name": "Honey Yellow",
+      "hex": "#F0C420",
+      "hue": 47.3,
+      "saturation": 0.867,
+      "value": 0.941
+    },
+    {
+      "name": "Flax",
+      "hex": "#EEDC82",
+      "hue": 50.0,
+      "saturation": 0.454,
+      "value": 0.933
+    },
+    {
+      "name": "Gold",
+      "hex": "#FFD700",
+      "hue": 50.6,
+      "saturation": 1.0,
+      "value": 1.0
+    },
+    {
+      "name": "Butter Yellow",
+      "hex": "#FFF3B0",
+      "hue": 50.9,
+      "saturation": 0.31,
+      "value": 1.0
+    },
+    {
+      "name": "Banana Yellow",
+      "hex": "#FFE135",
+      "hue": 51.1,
+      "saturation": 0.792,
+      "value": 1.0
+    },
+    {
+      "name": "Sunflower Yellow",
+      "hex": "#FFDA03",
+      "hue": 51.2,
+      "saturation": 0.988,
+      "value": 1.0
+    },
+    {
+      "name": "Cream Yellow",
+      "hex": "#FFF5B7",
+      "hue": 51.7,
+      "saturation": 0.282,
+      "value": 1.0
+    },
+    {
+      "name": "Lemon Chiffon",
+      "hex": "#FFFACD",
+      "hue": 54.0,
+      "saturation": 0.196,
+      "value": 1.0
+    },
+    {
+      "name": "Corn Yellow",
+      "hex": "#F0E36B",
+      "hue": 54.1,
+      "saturation": 0.554,
+      "value": 0.941
+    },
+    {
+      "name": "Maize",
+      "hex": "#FBEC5D",
+      "hue": 54.3,
+      "saturation": 0.629,
+      "value": 0.984
+    },
+    {
+      "name": "Lemon Yellow",
+      "hex": "#FFF44F",
+      "hue": 56.3,
+      "saturation": 0.69,
+      "value": 1.0
+    },
+    {
+      "name": "Canary Yellow",
+      "hex": "#FFFF99",
+      "hue": 60.0,
+      "saturation": 0.4,
+      "value": 1.0
+    },
+    {
+      "name": "Daffodil Yellow",
+      "hex": "#FFFF31",
+      "hue": 60.0,
+      "saturation": 0.808,
+      "value": 1.0
+    }
+  ]
+}
