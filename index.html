@@ -469,7 +469,8 @@ let attemptsThisRound = 0;
 let gameStart = 0;
 let busy = false;
 let lockBusy = false;
-const VERIFY_THRESHOLD = 0.5;
+const VERIFY_THRESHOLD = 0.30;
+const MATCH_THRESHOLD = 0.32;
 
 function base64ToArrayBuffer(base64){
   const binary = atob(base64);
@@ -629,7 +630,7 @@ async function handlePhoto(file){
     const confidencePct = Math.round(confidence*100);
 
     const targetKey = order[roundIndex];
-    const success = bestKey === targetKey && confidence >= 0.55;
+    const success = bestKey === targetKey && confidence >= MATCH_THRESHOLD;
 
     showResult(success, COLORS[bestKey] ? COLORS[bestKey].word : bestKey, confidencePct);
 
